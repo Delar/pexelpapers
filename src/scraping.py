@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 
 PEXELS_URL = 'https://www.pexels.com/'
+AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
 
 def _get_pages_urls():
     main_page_html = send_get_request(PEXELS_URL)
@@ -26,12 +27,11 @@ def get_image_urls():
 def send_get_request(url, file_name=None):
     """Optionally writes response to file if specified.
 
-    Uses 'Magic Browser' for the User-Agent
     :param url: url to send request to
     :param file_name: [opt] file to write response to
     :return: response context
     """
-    request = urllib.request.Request(url, headers={'User-Agent': 'Magic Browser'})
+    request = urllib.request.Request(url, headers={'User-Agent': AGENT})
     with urllib.request.urlopen(request) as response:
         response_context = response.read()
     if file_name is None:

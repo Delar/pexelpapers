@@ -11,4 +11,4 @@ def detect_resolution_windows():
 
 def set_wallpaper_windows(image_path):
     SPI_SETDESKWALLPAPER = 20
-    ctypes.windll.user32.SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, image_path, 0)
+    return ctypes.windll.user32.SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, image_path, 2)

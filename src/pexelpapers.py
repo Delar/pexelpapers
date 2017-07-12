@@ -5,49 +5,60 @@ import platform
 import random
 import re
 import struct
+import threading
 
 import scraping
 import os_specific
 
-IMAGES_PATH = os.getcwd()
+IMAGES_PATH = os.getcwd() + '\\'
+LAST_WALLPAPER = 'last_wallpaper'
 
 def main():
+    files = os.listdir(IMAGES_PATH)
+    for file in files:
+        if re.split('\.', file)[0] == LAST_WALLPAPER:
+            os.remove(IMAGES_PATH + file)
+    print('Getting image URLs...')
     image_urls = scraping.get_image_urls()
     screen_size = get_screen_size()
     while True:
         random_image_url = random.choice(image_urls)
-        random_image = download_images(IMAGES_PATH, [random_image_url])[0]
+        print('Downloading an image...')
+        random_image = download_image(IMAGES_PATH, random_image_url, file_name=LAST_WALLPAPER)
         screen_size = get_screen_size()
         image_size = get_image_size(random_image)
         if image_size[0] >= screen_size[0] and image_size[1] >= screen_size[1]:
+            print('Chosen image: ', random_image)
+            print('Setting wallpaper...')
             set_wallpaper(random_image)
-            os.remove(random_image)
+            set_wallpaper(random_image)
             break
 
 
 def set_wallpaper(image_path):
     if platform.system() == 'Windows' and platform.release() == '10':
-        os_specific.set_wallpaper_windows(image_path)
+        return os_specific.set_wallpaper_windows(image_path)
     else:
         raise NotImplementedError
 
 
-def download_images(path, urls):
-    """ Will not download if already exists in path.
+def download_image(path, url, file_name=None):
+    """ Will rewrite if already exists.
 
     :param path: path to download to
-    :param urls: images urls
-    :return: list of full names of downloaded files
+    :param urls: images url
+    :param file_name: extension is added automatically
+    :return: path to downloaded file
     """
-    downloaded = []
     if not os.path.isdir(path):
         os.mkdir(path)
-    for url in urls:
+    if file_name is None:
         file_name = re.split('/', url)[-1]
-        full_path = path + file_name
-        scraping.send_get_request(url, full_path)
-        downloaded.append(full_path)
-    return downloaded
+    else:
+        file_name += '.' + re.split('\.', url)[-1]
+    full_path = path + file_name
+    scraping.send_get_request(url, full_path)
+    return full_path
 
 
 def get_screen_size():
